@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>用户登录</title>
+	<style>
+		body{			
+			/*timg1.gif timg2.gif timg3.gif timg4.gif timg5.gif timg6.gif*/
+			background-image:url("{$root_path}static/work_web/images/timg.gif");
+			
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-attachment:fixed;
+		}
+		
+		.login_form{
+			position:absolute;
+       	 	left: 0;
+        	top: 0;
+        	width:100%;
+        	height:100%;
+        	display: table;
+		}
+		.login_div{
+			display: table-cell;
+        	vertical-align: middle;
+        	text-align: center;
+		}				
+		.login_content{
+			width:340px;
+			height:300px;
+			margin:0px auto 0px auto;
+			text-align:center;
+			background:url("{$root_path}static/work_web/images/content_bg.png");
+			border-radius:10px;
+			font-size:18px;
+			position:relative;
+		}
+		#notice{
+			position:absolute;
+			top:10px;
+			right:10px;
+			color:#F57AC3;
+			font-size:12px;
+			width:28px;
+			height:28px;
+			background:url("{$root_path}static/work_web/images/problem.png");
+			cursor:pointer;
+		}
+		.tit{
+			line-height:70px;
+		}
+		.tit h2{
+			margin:0px;
+			padding:0px;
+		} 
+		.li_text{
+			line-height:50px;
+		}
+		.li_text input{
+			padding:0px;
+			padding-left:10px;
+			margin:0px;
+			width:190px;
+			line-height:32px;
+			border:none;
+		}
+		.li_text select{
+			padding:0px;
+			padding-left:10px;
+			margin:0px;
+			width:200px;
+			height:32px;
+			line-height:32px;
+			font-size:12px;
+			border:none;
+			appearance:none;
+			-moz-appearance:none;
+			-webkit-appearance:none;
+		}
+		
+		.btn{
+			width:270px;
+			line-height:36px;
+			background:#F57AC3;
+			outline:none;
+			border:none;
+			border-radius:5px;
+			margin-top:20px;
+			cursor:pointer;
+			color:#fff;
+			font-size:18px;
+		}
+	</style>
+</head>	
+<body>
+	<form class="login_form" name="login_form" method="post" action="">
+		<div class="login_div">
+			<div class="login_content">
+				<div id="notice" onclick="display_notice();"></div>
+				<div class="tit"><h2>用 户 登 录</h2></div>
+				<div class="li_text">
+					用户名：<input type="text" name="username" />
+				</div>
+				<div class="li_text">
+					密 &nbsp; 码：<input type="password" name="password" />
+				</div>
+				
+				<div class="li_text">
+					部 &nbsp; 门：<select name="dep">
+						{volist name="dep_info" id="vo"}
+                        <option value="{$vo.id}">{$vo.dep}</option>
+                        {/volist}
+                    </select>
+				</div>
+
+				<input type="hidden" name="__token__" id="token" value="{$Request.token}" />
+				<div class="">
+					<input class="btn" type="submit" value="登 &nbsp;&nbsp;&nbsp;&nbsp; 录" onclick="return check_info();" />
+				</div>
+			</div>
+		</div>
+	</form>
+	<script src="{$root_path}static/work_web/js/jquery.min.js"></script>
+	<script>
+		function display_notice(){
+			alert('如有任何问题请联系管理员');
+		}
+
+		function check_info(){
+			var fm = document.forms['login_form'];
+			var username = trim(fm.username.value); //用户名
+			var password = trim(fm.password.value); //密码
+			var dep = trim(fm.dep.value); //部门	
+			var token = trim(document.getElementById('token').value); // token
+			if(!token){
+				alert("TOKEN 有误"); 
+				return false;
+			}
+			if(!username){
+				alert('请填写用户名');
+				return false;
+			}
+			if(!password){
+				alert('请填写密码');
+				return false;
+			}
+			if(!dep){
+				alert('请选择部门');
+				return false;
+			}		
+			$.ajax({  //ajax
+				async: false, //同步请求
+				type : "POST",
+				url : "{$login_url}",
+				data : {"sub":"send", "username":username, "password":password, "dep":dep},
+				dataType : 'json',
+				success : function(res){
+					if(res.status){
+						//window.location.reload(); //刷新当前页面
+						window.location.href = res.data.url;
+					}else{
+						alert(res.message);
+						return false;
+					}
+				},
+				error: function(){
+					alert('系统错误');
+				}
+			});	
+
+			return false;
+		}
+
+		function trim(str){ 
+			//去除左右两端的空格
+	　　    return str.replace(/(^\s*)|(\s*$)/g, "");
+		}
+		 
+	</script>
+</body>
+</html>

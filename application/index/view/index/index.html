@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>工作记录</title>
+	<style>
+		body{
+			width:1080px;
+			padding: 0;
+			margin: 0 auto;
+			font-family: 'Microsoft Yahei',Helvetica, Arial, sans-serif ; 
+		}
+        a{
+            text-decoration: none;
+        }
+
+		input{
+            width:100px;
+			display: inline-block;
+		    height: 20px;
+		    padding: 2px 6px;
+		    font-size: 14px;
+		    line-height: 1.42857143;
+		    color: #555;
+		    background-color: #fff;
+		    background-image: none;
+		    border: 1px solid #ccc;
+		    border-radius: 4px;
+		    outline:none;
+		}
+		
+		.query_data{
+			height:50px;
+			padding:20px 40px 0px 40px;
+            background: #fff;
+            text-align: center;
+            position: sticky;
+            top: 0px;
+		}
+		.div_li{
+			display: inline-block;
+		}
+        .div_li a{
+            color:#24B2F5
+        }
+        .div_li a:hover{
+            color:#f00;
+        }
+        .div_li select{
+            width:100px;
+            height:26px;
+        }
+		#sub, .btn{
+			display:inline-block;
+			padding:6px 20px;
+			color:#fff;
+			background:#24B2F5;
+            outline:none;
+            border:none;
+            border-radius: 5px;
+            cursor:pointer;
+		}
+
+		.data_table{
+			padding: 0;
+			margin: 0;
+			border-collapse: collapse;
+            font-size: 14px;
+		}
+		.data_table thead{
+			background-color: #00f;
+		}
+		.data_table tr td,.data_table th{
+			line-height: 24px;
+			min-width: 24px;
+			border: 1px solid #000; /*#d4d4d4*/
+			padding:7px 5px;
+			vertical-align: top;
+		}
+        .add_btn{
+            background:#21AEF4;
+            width:auto;
+            padding:10px;
+            color:#fff;
+            cursor:pointer;
+            text-align: center;
+            margin:0 auto;
+            font-size: 18px;
+            font-weight: bold;
+            position: sticky;
+            top: 60px;
+        }
+        tr.theard{
+            /*
+            position: sticky;
+            top: 100px;
+            */
+        }
+        .page{
+            text-align: center;
+        }
+        .page ul{
+            list-style-type: none;
+            height:30px;
+            line-height: 30px;
+            text-align: center;
+        }
+        .page ul li{
+            display: inline-block;
+            width:30px;
+            height:30px;
+            margin:2px;
+            background: #dfdfdf;
+        }
+        .page ul li a{
+            background: #dfdfdf;
+            display: inline-block;
+            width:30px;
+            height:30px;
+            color:#000;
+
+        }
+        .page ul li.active{
+            background: #24B2F5;
+            color:#fff;
+        }
+        .page ul li:hover,.page ul li a:hover{
+            background: #24B2F5;
+            color:#fff;
+        }
+	</style>
+    <script src="{$root_path}static/work_web/js/jquery.min.js"></script>
+</head>	
+
+<body>
+	<div class="query_data">
+        <form name='query_info' method="get" action="">
+            <div class="div_li">
+                你好 <a href="{$login_out_url}" title="退出">{$user.username}</a> {$user.station}
+            </div> &nbsp;&nbsp;
+            {if $user.is_manger}
+    		<div class="div_li">
+    			员工姓名：
+    			<input type="text" name="username" id="username" value="{if(!empty($param['username']))}{$param['username']}{/if}" placeholder="员工姓名" />
+    		</div> &nbsp;&nbsp;
+            {/if}
+    		<div class="div_li">
+    			完成情况：
+                <select name="finished" id="finished" >
+                    <option value="">请选择</option>
+                    <option value="1" {if (!empty($param['finished']) && $param['finished']==1)}selected{/if}>进行中</option>
+                    <option value="2" {if (!empty($param['finished']) && $param['finished']==2)}selected{/if}>已完成</option>
+                </select>
+    		</div> &nbsp;&nbsp; <!-- 2019-03-18 -->
+    		<div class="div_li">
+    			时间：
+    			<input type="date" name="stime" id="stime" value="{if(!empty($param['stime']))}{$param['stime']}{/if}" placeholder="起始时间" />
+    			—
+    			<input type="date" name="etime" id="etime" value="{if(!empty($param['etime']))}{$param['etime']}{/if}" placeholder="结束时间" />
+    		</div> &nbsp;&nbsp;
+    		<button id="sub" type="submit" onclick="return check_info();">查 询</button>
+        </form>
+	</div>
+    <script>
+        // 时间显示今日日期
+        var date = new Date();
+        var year = date.getFullYear(); // 当前时间年份
+        var month = date.getMonth() + 1; // 月份
+        if(month < 10){
+            month = '0' + String(month);
+        }
+        var day = date.getDate(); // 日期
+        if(day < 10){
+            day = '0' + String(day);
+        }
+        var time = year + '-' + month + '-' + day;
+        if(!document.getElementById('stime').value){
+            document.getElementById('stime').value = time;
+        }
+        if(!document.getElementById('etime').value){
+            document.getElementById('etime').value = time; 
+        }
+        
+        
+
+        function check_info(){
+            var date = new Date();
+            var year = date.getFullYear(); // 当前时间年份
+            var month = date.getMonth() + 1; // 月份
+            if(month < 10){
+                month = '0' + String(month);
+            }
+            var day = date.getDate(); // 日期
+            if(day < 10){
+                day = '0' + String(day);
+            }
+            var time = year + '-' + month + '-' + day; // 当前时间
+            
+            var stime = trim(document.getElementById('stime').value);
+            var etime = trim(document.getElementById('etime').value);
+            var username = trim(document.getElementById('username').value);
+            var finished = trim(document.getElementById('finished').value); 
+           
+            if(!stime){
+                alert('请选择查询的起始时间');
+                return false;
+            }
+            if(!etime){
+                alert('请选择查询的结束时间');
+                return false;
+            }
+            if(etime > time){
+                alert('选择查询的结束时间不能大于当前时间');
+                return false;
+            }
+            if(stime > etime){
+                alert('选择查询的起始时间不能大于结束时间');
+                return false;
+            }
+
+            if(username && username.length > 20){
+                alert('选择查询的员工姓名不能大于20个字符');
+                return false;
+            }
+
+            if(stime){
+                var t = stime.split('-');
+                var y = parseInt(t[0]);
+                var m = parseInt(t[1]); 
+                var d = t[2];
+                var month = m + 3; // 月份加3，最多只需查询三个月数据
+                if(m > 9){
+                    var month = m + 3 - 12;
+                    y = parseInt(t[0]) + 1;
+                }
+                if(month < 10){
+                    month = '0' + String(month);
+                }
+                var mtime = y + '-' + month + '-' + d; // 最大的结束时间点
+                
+                if(etime > mtime){
+                    alert('选择查询的时间段不能大于3个月');
+                    return false;
+                }
+               
+            }
+            // return false;
+        }    
+
+    </script>
+        
+    <div style="margin:20px 0px">
+        <div class="form-group">
+            <div class="add_btn" {if $today_data['flag']==0} onclick="dis_info('logs','add');"{else /} onclick="dis_info('logs','update', {$today_data['id']});" {/if}>{$today_data['title']}</div> 
+            
+            <table class="data_table" style="width:1080px;margin:0 auto;text-align:center;">
+                <tr class="theard" bgcolor="#ccc" style="line-height:30px;text-align:center;">
+                    <th>编号</th>
+                    <th>岗位</th>
+                    <th>姓名</th>
+                    <th>工作内容</th>
+                    <th>完成情况</th>
+                    <th>备注说明</th>
+                    <th>记录时间</th>
+                </tr>
+                {volist name="logs_list" id="vo"  key="k"}
+                <tr {if $k%2==0}bgcolor="#f6f4f0"{/if} style="text-align:center;">
+                    <td style="text-align:center;min-width:60px;">{$k}</td>
+                    <td style="text-align:center;min-width:60px;">{$vo.station}</td>
+                    <td style="text-align:center;min-width:60px;">{$vo.name}</td>
+                    <td style="text-align:left;min-width:80px;">
+                        {$vo.work_content|raw}
+                    </td>
+                    <td style="text-align:center;min-width:80px;">{$vo.finished}</td>       
+                    <td style="text-align:center;min-width:60px;">
+                        {$vo.notes|raw}
+                    </td>
+                    <td style="text-align:center;min-width:100px;">{$vo.create_time}</td>
+                </tr>
+                {/volist}
+            </table>
+            <div class="page">{$page|raw}</div>
+        </div>
+    </div>
+
+    <style>
+        #add_div{
+            position:fixed;
+            left: 0;
+            top: 0;          
+            width:100%;
+            height:100%;      
+            background:rgba(0,0,0,0.3);
+            //display: table;
+            display: none;
+        }
+        #add_div .info_box{
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+        #add_div #cont_div{
+            width:500px;
+            height:auto;
+            position:relative;  
+            display: inline-block;
+            margin:0 auto;      
+            background:#fff;
+        }
+        #add_div #cont_div .ctop{
+            width:480px;
+            height:40px;
+            line-height:40px;
+            padding-left:20px;
+            padding-right:-20px;
+            background:#21AEF4;
+            color:#fff;
+        }
+        #add_div #cont_div .ctop #stit{
+            display:block;
+            float:left;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #add_div #cont_div .ctop #sclose{
+            display:block;
+            width:40px;
+            height:40px;
+            text-align: center;
+            font-size: 20px;
+            float:right;
+            cursor:pointer;
+        }
+        #add_div #cont_div .cli{
+            width:100%;
+            height:50px;
+            padding-bottom:10px;
+        }
+        #add_div #cont_div .cleft{
+            width:100px;
+            line-height:40px;
+            float:left;
+            text-align:right;
+        }
+        #add_div #cont_div .cright{
+            width:auto;
+            line-height:30px;
+            float:left;
+            text-align:left;
+        }
+        #add_div #cont_div .cright .text{
+            width:360px;
+            min-height:100px;
+            line-height:24px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-fill-color: #000; /*文字颜色*/
+            -webkit-text-fill-color: #000;
+        }
+        #add_div #cont_div .cright .text:focus{
+            color:#28C2FD; /*光标颜色*/
+
+        }
+
+        #add_div #cont_div .cright select{
+            height:30px;
+            line-height:30px;
+            max-width:260px;
+        }
+        #add_div #cont_div input{
+           //line-height:30px; 
+        }
+        #add_div #cont_div .btn{
+            background:#21AEF4;
+            color:#fff;
+            font-size: 16px;
+        }
+    </style>
+    <div id="add_div">
+        <div class="info_box">
+            <div id="cont_div">
+                <form action="" method="" name="info_form">
+                    <div class="ctop">
+                        <span id="stit">添加今日工作记录</span>
+                        <span id="sclose" onclick="close_info();">×</span>
+                    </div>
+                    <br/>
+                    <div class="cli" style="min-height:100px;">
+                        <div class="cleft">工作内容：</div>
+                        <div class="cright">
+                            <div class="text" contenteditable="true"  id="work_content" name="work_content" value="" >{if $today_data['flag']}{$today_data['work_content']|raw}{/if}</div>
+                        </div>
+                    </div><br/>
+                    <div class="cli" style="min-height:100px;">          
+                        <div class="cleft">备注说明：</div>
+                        <div class="cright">
+                            <div class="text" contenteditable="true" name="notes" id="notes" value="" >{if $today_data['flag'] && $today_data['notes']}{$today_data['notes']|raw}{/if}</div> 
+                        </div>
+                    </div><br/>
+                    <div class="cli">
+                        <div class="cleft">完成情况：</div>
+                        <div class="cright">
+                            <select name="finished" id="select" style="width:120px;line-height:50px;height:40px;font-size:15px">
+                                <option title="" value="">请选择</option>
+                                <option title="" value="1">进行中</option>
+                                <option title="" value="2">已完成</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="clear:both;"></div>
+                    <div class="cli" style="clear:both;text-align:center;height:50px;">                     
+                        <input type='hidden' id="data_db" name="data_db" value="" />
+                        <input type='hidden' id="data_id" name="data_id" value="" />
+                        <button type="submit" class="btn" onclick="return check_data();">确 定</botton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var add_div = document.getElementById('add_div');
+        var cont_div = document.getElementById('cont_div');
+        var stit = document.getElementById('stit');
+        var con_int_level = document.getElementById('con_int_level');
+        
+        function dis_info(data, act, id=0){ // 显示窗口
+            add_div.style.display='table';
+            document.getElementById('data_id').value = id;
+            document.getElementById('data_db').value = data;
+            if(data == 'logs'){
+                if(act == 'add'){
+                    stit.innerHTML = '添加今日工作记录';
+                    var fm = document.forms['info_form'];
+                    fm.finished.value = '';
+                    // fm.work_content.value = '';  
+                    // fm.notes.value = '';
+                    document.getElementById('work_content').innerHTML = '';
+                    document.getElementById('notes').innerHTML = '';
+                }else if(act == 'update'){
+                    stit.innerHTML = '更新今日工作记录';
+                    var fm = document.forms['info_form'];
+                    fm.finished.value = "{if $today_data['flag']}{$today_data['finished']}{/if}";
+                }
+            }
+        }
+
+        function close_info(){ // 关闭
+            add_div.style.display='none';
+        }       
+        add_div.onclick = function(event){
+            this.style.display = 'none';
+            event.preventDefault(); // 阻止默认事件的发生
+        }
+        cont_div.onclick = function(event){         
+            event.stopPropagation(); // 阻止其他事件冒泡  
+        }
+        
+
+        function check_data(){ // 检测提交信息的正确性
+            var fm = document.forms['info_form'];
+            var finished = fm.finished.value;
+            // var work_content = trim(fm.work_content.value);
+            // var notes = trim(fm.notes.value);
+            var work_content = trim(document.getElementById('work_content').innerHTML);
+            var notes = trim(document.getElementById('notes').innerHTML);
+            var data_db = document.getElementById('data_db').value;
+            var data_id = document.getElementById('data_id').value;
+            
+            if(work_content.length==0){
+                alert('请填写工作内容');
+                return false;
+            }
+            
+            if(finished.length==0){
+                alert('请选择完成情况');
+                return false;
+            }
+           
+            if(data_db == 'logs'){
+                if(data_id){ // 有ID,编辑数据
+                    $.ajax({  //ajax
+                        async: false, //同步请求
+                        type : "POST",
+                        url : "{$post_url}",               
+                        data : {"data":data_db, "id":data_id, "work_content":work_content, "finished":finished, "notes":notes},
+                        dataType : 'json',
+                        success : function(res){
+                            alert(res.message);
+                            if(res.status){
+                                window.location.reload(); // 刷新当前页面
+                            }else{
+                                return false;
+                            }
+                        }
+                    }); 
+                }else{ // 无ID,新增数据
+                    $.ajax({  //ajax
+                        async: false, //同步请求
+                        type : "POST",
+                        url : "{$post_url}",               
+                         data : {"data":data_db, "work_content":work_content, "finished":finished, "notes":notes},
+                        dataType : 'json',
+                        success : function(res){
+                            alert(res.message);
+                            if(res.status){
+                                window.location.reload(); // 刷新当前页面
+                            }else{
+                                return false;
+                            }
+                        }
+                    });
+                }
+            }
+            
+            return false;  //使用ajax 不用提交表单       
+        }
+
+        function data_update(id, type){ // 编辑
+            dis_info(type, 'update', id);
+        }
+
+        function data_delete(id, type){ // 删除
+            if(confirm('您确定要删除吗？')){
+                var purl = window.location.href;  //当前页面地址
+                //alert(purl);                           
+                $.ajax({  //ajax
+                    async: false, //同步请求
+                    type: "POST",
+                    url: purl,
+                    data: {"id":id,"type":type,"data":'delete'},
+                    dataType: "json",
+                    success: function(msg){
+                        alert(msg.msg);
+                        if(msg.status){
+                            window.location.reload(); //刷新当前页面                                       
+                        }else{
+                            return false;
+                        }
+                    },
+                    
+                    error: function(){
+                        alert('抱歉，出错了');
+                    }
+                });
+                return false;  //使用ajax 不用提交表单 
+            }
+        }
+
+        function trim(str){ // 去除左右两端的空格
+    　　    return str.replace(/(^\s*)|(\s*$)/g, "");
+        }
+    </script>
+
+</body>
+</html>
